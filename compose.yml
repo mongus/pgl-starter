@@ -1,0 +1,107 @@
+name: ${PROJECT_LABEL:-pgl-starter}-${STAGE:-development}
+
+services:
+  # PostgreSQL with PostGIS and persistent storage.
+  postgres:
+    image: postgis/postgis:${POSTGRES_VERSION}  # adjust tag/version as needed
+    container_name: ${PROJECT_LABEL:-pgl-starter}-${STAGE:-development}.postgres
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - EXPOSED_SCHEMA=${EXPOSED_SCHEMA:-public}
+      - AUTH_SCHEMA=${AUTH_SCHEMA:-auth}
+      - USER_ID_TYPE=${USER_ID_TYPE:-UUID}
+    volumes:
+      - ./volumes/postgres/data:/var/lib/postgresql/data
+      - ./volumes/postgres/initdb:/docker-entrypoint-initdb.d:ro
+#    ports:
+#      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 1s
+
+  # Database management.
+  db_admin:
+    build:
+      context: Dockerfile/db-admin
+    container_name: ${PROJECT_LABEL:-pgl-starter}-${STAGE:-development}.db-admin
+#    restart: "on-failure"
+    env_file:
+      - .env
+    environment:
+      - EXPOSED_SCHEMA=${EXPOSED_SCHEMA:-public}
+      - AUTH_SCHEMA=${AUTH_SCHEMA:-auth}
+      - USER_ID_TYPE=${USER_ID_TYPE:-UUID}
+      - DATABASE_URL=postgres://${POSTGRAPHILE_USER}:${POSTGRAPHILE_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - SHADOW_DATABASE_URL=postgres://${POSTGRAPHILE_USER}:${POSTGRAPHILE_PASSWORD}@postgres:5432/${POSTGRES_DB}_shadow
+      - ROOT_DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/postgres
+#      - GRAPHILE_ENV=${STAGE:-development}
+    volumes:
+      - ./volumes/db-admin:/db-admin
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # PostGraphile GraphQL API service.
+  postgraphile:
+    build:
+      context: Dockerfile/postgraphile
+    ports:
+      - "${GRAPHQL_PORT:-5678}:5678"
+    container_name: ${PROJECT_LABEL:-pgl-starter}-${STAGE:-development}.postgraphile
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgres://${POSTGRAPHILE_USER}:${POSTGRAPHILE_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - SUPERUSER_DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - GRAPHILE_ENV=${STAGE:-development}
+      - GRAPHQL_PORT=${GRAPHQL_PORT:-5678}
+      - EXPOSED_SCHEMA=${EXPOSED_SCHEMA:-public}
+      - AUTH_SCHEMA=${AUTH_SCHEMA:-auth}
+      - JWT_TTL=${JWT_TTL:-1h}
+    volumes:
+      - ./volumes/postgraphile/graphile.config.mjs:/home/node/graphile.config.mjs:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db_admin:
+        condition: service_started
+
+  # Graphile Worker for background job processing.
+  graphile_worker:
+    image: graphile/worker:latest
+    container_name: ${PROJECT_LABEL:-pgl-starter}-${STAGE:-development}.graphile-worker
+    restart: always
+    environment:
+      - DATABASE_URL=postgres://${POSTGRAPHILE_USER}:${POSTGRAPHILE_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    volumes:
+      - ./volumes/graphile-worker/tasks:/worker/tasks:ro
+      - ./volumes/graphile-worker/crontab:/worker/crontab:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db_admin:
+        condition: service_started
+
+  react_admin:
+    build:
+      context: Dockerfile/react-admin
+    container_name: ${PROJECT_LABEL:-pgl-starter}-${STAGE:-development}.react-admin
+    restart: always
+    ports:
+      - "${REACT_ADMIN_PORT:-5173}:5173"
+    env_file:
+      - .env
+    environment:
+      - GRAPHQL_PORT=${GRAPHQL_PORT:-5678}
+    volumes:
+      - ./volumes/react-admin:/home/node
+      # - /home/aaron/Workspace/Mongus/ra-postgraphile:/home/node/ra-postgraphile
+    depends_on:
+      postgraphile:
+        condition: service_healthy
