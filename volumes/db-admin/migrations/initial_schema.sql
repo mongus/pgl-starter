@@ -24,6 +24,14 @@ SET row_security = off;
 CREATE SCHEMA :AUTH_SCHEMA;
 
 
+
+--
+-- Name: postgis; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
+
+
 --
 -- Name: citext; Type: EXTENSION; Schema: -; Owner: -
 --
