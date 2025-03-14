@@ -18,6 +18,9 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "${POSTGRES_DB}" <<-EOSQL
     CREATE ROLE app_user;
     GRANT app_user TO ${POSTGRAPHILE_USER};
 
+    CREATE ROLE admin;
+    GRANT admin TO ${POSTGRAPHILE_USER};
+
     -- Create the exposed schema if necessary
     CREATE SCHEMA IF NOT EXISTS ${EXPOSED_SCHEMA};
     -- Grant all privileges on the exposed schema to the PostGraphile user
