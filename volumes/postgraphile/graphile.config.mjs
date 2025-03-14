@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 
 import { PostGraphileAmberPreset } from "postgraphile/presets/amber";
-import { PostGraphileRelayPreset } from "postgraphile/presets/relay";
 import { makePgService } from "postgraphile/@dataplan/pg/adaptors/pg";
 
 import { PgSimplifyInflectionPreset } from "@graphile/simplify-inflection";
@@ -84,23 +83,58 @@ async function authorize(ctx, args) {
     return { pgSettings };
 }
 
+/** @type {GraphileConfig.Plugin} */
+const NodeIdPlugin = {
+    name: "NodeIdPlugin",
+    version: "0.0.1",
+    after: ["PgAttributesPlugin", "PgMutationUpdateDeletePlugin"],
+    inflection: {
+        ignoreReplaceIfNotExists: ["nodeIdFieldName"],
+        replace: {
+            // Undo rename of 'id' to 'rowId'
+            _attributeName(previous, options, details) {
+                const name = previous(details);
+                if (!details.skipRowId && name === "row_id") {
+                    const { codec, attributeName } = details;
+                    const attribute = codec.attributes[attributeName];
+                    const baseName =
+                        attribute.extensions?.tags?.name || attributeName;
+                    if (baseName === "id" && !codec.isAnonymous) {
+                        return "id";
+                    }
+                }
+                return name;
+            },
+            // Rename GraphQL Global Object Identification 'id' to 'nodeId'
+            // NOTE: this would be better as `_id` in general, but V4 uses `nodeId`
+            nodeIdFieldName() {
+                return "nodeId";
+            },
+        },
+    },
+}
+
 /** @type {GraphileConfig.Preset} */
 const preset = {
+    options: {
+        classicIds: true,
+    },
+
     extends: [
         PostGraphileAmberPreset,
-        PostGraphileRelayPreset,
         PgSimplifyInflectionPreset,
         ConnectionFilterPlugin.PostGraphileConnectionFilterPreset
     ],
 
     plugins: [
         PgOmitArchivedPlugin,
+        NodeIdPlugin
     ],
 
     schema: {
         dontSwallowErrors: true,
         pgJwtSecret: process.env.JWT_SECRET,
-        pgArchivedColumnName: 'archived_at'
+        pgArchivedColumnName: 'archived_at',
     },
 
     gather: {
