@@ -5,14 +5,15 @@ export type AuthenticatePayloadFieldPolicy = {
 	query?: FieldPolicy<any> | FieldReadFunction<any>,
 	result?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('authenticate' | 'updateUserById' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('authenticate' | 'updateUser' | 'updateUserByNodeId' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
 	authenticate?: FieldPolicy<any> | FieldReadFunction<any>,
-	updateUserById?: FieldPolicy<any> | FieldReadFunction<any>
+	updateUser?: FieldPolicy<any> | FieldReadFunction<any>,
+	updateUserByNodeId?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type NodeKeySpecifier = ('id' | NodeKeySpecifier)[];
+export type NodeKeySpecifier = ('nodeId' | NodeKeySpecifier)[];
 export type NodeFieldPolicy = {
-	id?: FieldPolicy<any> | FieldReadFunction<any>
+	nodeId?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type PageInfoKeySpecifier = ('endCursor' | 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | PageInfoKeySpecifier)[];
 export type PageInfoFieldPolicy = {
@@ -21,12 +22,13 @@ export type PageInfoFieldPolicy = {
 	hasPreviousPage?: FieldPolicy<any> | FieldReadFunction<any>,
 	startCursor?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('id' | 'node' | 'query' | 'userById' | 'users' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('node' | 'nodeId' | 'query' | 'user' | 'userByNodeId' | 'users' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
-	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	node?: FieldPolicy<any> | FieldReadFunction<any>,
+	nodeId?: FieldPolicy<any> | FieldReadFunction<any>,
 	query?: FieldPolicy<any> | FieldReadFunction<any>,
-	userById?: FieldPolicy<any> | FieldReadFunction<any>,
+	user?: FieldPolicy<any> | FieldReadFunction<any>,
+	userByNodeId?: FieldPolicy<any> | FieldReadFunction<any>,
 	users?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type UpdateUserPayloadKeySpecifier = ('clientMutationId' | 'query' | 'user' | 'userEdge' | UpdateUserPayloadKeySpecifier)[];
@@ -36,11 +38,12 @@ export type UpdateUserPayloadFieldPolicy = {
 	user?: FieldPolicy<any> | FieldReadFunction<any>,
 	userEdge?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type UserKeySpecifier = ('archivedAt' | 'createdAt' | 'id' | UserKeySpecifier)[];
+export type UserKeySpecifier = ('archivedAt' | 'createdAt' | 'id' | 'nodeId' | UserKeySpecifier)[];
 export type UserFieldPolicy = {
 	archivedAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
-	id?: FieldPolicy<any> | FieldReadFunction<any>
+	id?: FieldPolicy<any> | FieldReadFunction<any>,
+	nodeId?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type UserConnectionKeySpecifier = ('edges' | 'nodes' | 'pageInfo' | 'totalCount' | UserConnectionKeySpecifier)[];
 export type UserConnectionFieldPolicy = {

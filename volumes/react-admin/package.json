@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "pregen": "graphql-inspector introspect http://postgraphile:${GRAPHQL_PORT:-5678}/graphql -w schema.graphql",
+    "pregen": "graphql-inspector introspect http://postgraphile:5678/graphql -w schema.graphql",
     "gen": "graphql-codegen"
   },
   "dependencies": {

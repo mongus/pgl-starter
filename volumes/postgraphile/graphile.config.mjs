@@ -150,7 +150,7 @@ const preset = {
     },
 
     grafserv: {
-        port: process.env.GRAPHQL_PORT,
+        port: 5678,
         watch: true,
         dangerouslyAllowAllCORSRequests: true,
     },

@@ -33,6 +33,8 @@ export type Scalars = {
    * to unexpected results.
    */
   Datetime: { input: any; output: any; }
+  /** A universally unique identifier as defined by [RFC 4122](https://tools.ietf.org/html/rfc4122). */
+  UUID: { input: any; output: any; }
 };
 
 /** All input for the `authenticate` mutation. */
@@ -84,15 +86,53 @@ export enum IncludeArchivedOption {
   YES = 'YES'
 }
 
-/** All input for the `updateUserById` mutation. */
-export type UpdateUserByIdInput = {
+/** A filter to be used against UUID fields. All fields are combined with a logical ‘and.’ */
+export type UUIDFilter = {
+  /** Not equal to the specified value, treating null like an ordinary value. */
+  distinctFrom?: InputMaybe<Scalars['UUID']['input']>;
+  /** Equal to the specified value. */
+  equalTo?: InputMaybe<Scalars['UUID']['input']>;
+  /** Greater than the specified value. */
+  greaterThan?: InputMaybe<Scalars['UUID']['input']>;
+  /** Greater than or equal to the specified value. */
+  greaterThanOrEqualTo?: InputMaybe<Scalars['UUID']['input']>;
+  /** Included in the specified list. */
+  in?: InputMaybe<Array<Scalars['UUID']['input']>>;
+  /** Is null (if `true` is specified) or is not null (if `false` is specified). */
+  isNull?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Less than the specified value. */
+  lessThan?: InputMaybe<Scalars['UUID']['input']>;
+  /** Less than or equal to the specified value. */
+  lessThanOrEqualTo?: InputMaybe<Scalars['UUID']['input']>;
+  /** Equal to the specified value, treating null like an ordinary value. */
+  notDistinctFrom?: InputMaybe<Scalars['UUID']['input']>;
+  /** Not equal to the specified value. */
+  notEqualTo?: InputMaybe<Scalars['UUID']['input']>;
+  /** Not included in the specified list. */
+  notIn?: InputMaybe<Array<Scalars['UUID']['input']>>;
+};
+
+/** All input for the `updateUserByNodeId` mutation. */
+export type UpdateUserByNodeIdInput = {
   /**
    * An arbitrary string value with no semantic meaning. Will be included in the
    * payload verbatim. May be used to track mutations by the client.
    */
   clientMutationId?: InputMaybe<Scalars['String']['input']>;
   /** The globally unique `ID` which will identify a single `User` to be updated. */
-  id: Scalars['ID']['input'];
+  nodeId: Scalars['ID']['input'];
+  /** An object where the defined keys will be set on the `User` being updated. */
+  patch: UserPatch;
+};
+
+/** All input for the `updateUser` mutation. */
+export type UpdateUserInput = {
+  /**
+   * An arbitrary string value with no semantic meaning. Will be included in the
+   * payload verbatim. May be used to track mutations by the client.
+   */
+  clientMutationId?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['UUID']['input'];
   /** An object where the defined keys will be set on the `User` being updated. */
   patch: UserPatch;
 };
@@ -101,6 +141,8 @@ export type UpdateUserByIdInput = {
 export type UserCondition = {
   /** Checks for equality with the object’s `createdAt` field. */
   createdAt?: InputMaybe<Scalars['Datetime']['input']>;
+  /** Checks for equality with the object’s `id` field. */
+  id?: InputMaybe<Scalars['UUID']['input']>;
 };
 
 /** A filter to be used against `User` object types. All fields are combined with a logical ‘and.’ */
@@ -109,6 +151,8 @@ export type UserFilter = {
   and?: InputMaybe<Array<UserFilter>>;
   /** Filter by the object’s `createdAt` field. */
   createdAt?: InputMaybe<DatetimeFilter>;
+  /** Filter by the object’s `id` field. */
+  id?: InputMaybe<UUIDFilter>;
   /** Negates the expression. */
   not?: InputMaybe<UserFilter>;
   /** Checks for any expressions in this list. */
@@ -119,6 +163,8 @@ export type UserFilter = {
 export enum UserOrderBy {
   CREATED_AT_ASC = 'CREATED_AT_ASC',
   CREATED_AT_DESC = 'CREATED_AT_DESC',
+  ID_ASC = 'ID_ASC',
+  ID_DESC = 'ID_DESC',
   NATURAL = 'NATURAL',
   PRIMARY_KEY_ASC = 'PRIMARY_KEY_ASC',
   PRIMARY_KEY_DESC = 'PRIMARY_KEY_DESC'
@@ -127,6 +173,7 @@ export enum UserOrderBy {
 /** Represents an update to a `User`. Fields that are set will be updated. */
 export type UserPatch = {
   archivedAt?: InputMaybe<Scalars['Datetime']['input']>;
+  id?: InputMaybe<Scalars['UUID']['input']>;
 };
 
 export type AuthenticateMutationVariables = Exact<{

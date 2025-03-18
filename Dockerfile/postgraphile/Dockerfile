@@ -11,4 +11,4 @@ HEALTHCHECK --interval=10s --timeout=5s --start-period=1s --retries=3 \
   CMD wget --quiet \
     --header="Content-Type: application/json" \
     --post-data='{"query": "{ __typename }"}' \
-    -O - http://localhost:${GRAPHQL_PORT}/graphql | grep -q '"data"'
+    -O - http://localhost:5678/graphql | grep -q '"data"'
